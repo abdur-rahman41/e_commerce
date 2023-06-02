@@ -1,0 +1,233 @@
+
+import 'dart:developer';
+
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:e_commerce/data/models/home_slider_model.dart';
+import 'package:e_commerce/ui/screens/email_verification_screen.dart';
+import 'package:e_commerce/ui/screens/profile_screen.dart';
+import 'package:e_commerce/ui/state_manager/auth_controller.dart';
+import 'package:e_commerce/ui/state_manager/bottom_navigation_bar_controller.dart';
+import 'package:e_commerce/ui/state_manager/category_controller.dart';
+import 'package:e_commerce/ui/state_manager/home_controller.dart';
+import 'package:e_commerce/ui/state_manager/product_by_remark_controller.dart';
+import 'package:e_commerce/ui/utils/app_colors.dart';
+import 'package:e_commerce/ui/utils/styles.dart';
+import 'package:flutter/material.dart';
+
+import '../widgets/app_bar_icon_button.dart';
+import '../widgets/category_card_widget.dart';
+import '../widgets/home/home_carousel_widget.dart';
+import '../widgets/home/remarks_title_widget.dart';
+import '../widgets/home/search_text_field_widget.dart';
+import '../widgets/product_card.dart';
+import 'package:get/get.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar:AppBar(
+            backgroundColor: Colors.white,
+            elevation: 1,
+            title: Row(
+              children: [
+                Image.asset("assets/images/logo_nav.png"),
+                const Spacer(),
+                AppBarIconButton(
+                  inconData: Icons.person,
+                  onTap: ()
+                  async {
+                   String? t =  AuthController.token;
+                 //  log(t.toString());
+                    Get.find<AuthController>().isLoggedIn().then((value) {
+                     // log(value.toString());
+                      if(value!=null)
+                        {
+                          Get.to(const ProfileScreen());
+
+                        }
+                        else
+                          {
+                            Get.to( const EmailVerificationScreen());
+                          }
+                    }
+                    );
+
+                  },
+
+                ),
+                AppBarIconButton(
+                  inconData: Icons.call,
+                  onTap: ()
+                  {
+
+                  },
+
+                ),
+                AppBarIconButton(
+                  inconData: Icons.notifications_none,
+                  onTap: ()
+                  {
+
+                  },
+
+                )
+              ],
+            )
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+
+          child: SingleChildScrollView(
+            child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                     const SearchTextFieldWidget(),
+                     const SizedBox(height: 16,),
+                    GetBuilder<HomeController>(
+
+                      builder: (homeController) {
+                        if(homeController.getSliderInprogress)
+                          {
+                            return const SizedBox(
+                                height: 180,
+                                child: Center(child:  CircularProgressIndicator()));
+                          }
+                        return HomeCarouselWidget(homeSliderModel: homeController.homeSliderModel,);
+                      }
+                    ),
+                    SizedBox(height: 16,),
+                    RemarksTitleWidget(remarksName: 'Categories', onTapSeeAll: (){
+                        Get.find<BottomNavigationBarController>().changeIndex(1);
+                    },),
+                    GetBuilder<CategoryController>(
+
+                      builder: (categoryController) {
+                          if(categoryController.getCategoryInprogress)
+                            {
+                              return const SizedBox(
+                                  height: 90,
+                                child: Center(
+                                      child:CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+
+                            children: categoryController.categoryModel.categories!.map(
+                                    (e) => CategoryCardWidget(name: e.categoryName.toString(), imageUrl: e.categoryImg.toString(), id: e.id??0,) ).toList(),
+                          ),
+                        );
+                      }
+                    ),
+                    RemarksTitleWidget(remarksName: 'Popular', onTapSeeAll: (){ },),
+                    SizedBox(height: 8,),
+                    GetBuilder<ProductByRemarkController>(
+
+                        builder: (productByRemarkController) {
+                          if(productByRemarkController.getPopularProductByRemarkInProgress)
+                          {
+                            return const SizedBox(
+                              height: 90,
+                              child: Center(
+                                child:CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+
+                              children: productByRemarkController.popularProductsModel.products!.map(
+                                      (product) => ProductCard(product: product,) ).toList(),
+                            ),
+                          );
+                        }
+                    ),
+
+                    const SizedBox(height: 8,),
+                    RemarksTitleWidget(remarksName: 'Special', onTapSeeAll: (){ },),
+                    const SizedBox(height: 8,),
+                    GetBuilder<ProductByRemarkController>(
+
+                        builder: (productByRemarkController) {
+                          if(productByRemarkController.getSpecialProductByRemarkInProgress)
+                          {
+                            return const SizedBox(
+                              height: 90,
+                              child: Center(
+                                child:CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+
+                              children: productByRemarkController.specialProductsModel.products!.map(
+                                      (product) => ProductCard(product: product,) ).toList(),
+                            ),
+                          );
+                        }
+                    ),
+                    const SizedBox(height: 8,),
+                    RemarksTitleWidget(remarksName: 'New', onTapSeeAll: (){ },),
+                    const SizedBox(height: 8,),
+                    GetBuilder<ProductByRemarkController>(
+
+                        builder: (productByRemarkController) {
+                          if(productByRemarkController.getNewProductByRemarkInProgress)
+                          {
+                            return const SizedBox(
+                              height: 90,
+                              child: Center(
+                                child:CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+
+                              children: productByRemarkController.newProductsModel.products!.map(
+                                      (product) => ProductCard(product: product,) ).toList(),
+                            ),
+                          );
+                        }
+                    ),
+
+
+                  ],
+            ),
+          ),
+        ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
